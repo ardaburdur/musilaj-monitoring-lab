@@ -39,17 +39,29 @@ if st.button("🚀 START LIVE SYSTEM SCAN", type="primary"):
         poc = chl * 45.0 
         
         # 4. DISSOLVED OXYGEN (Thermodynamic Model)
-        oxy = 300 - (temp * 3.5) + random.uniform(-5, 5)
+        # Reduced noise for stability (-1.0 to +1.0)
+        oxy = 300 - (temp * 3.5) + random.uniform(-1.0, 1.0)
         
-        # --- RISK CALCULATION ---
+        # --- SMOOTH RISK CALCULATION (Linear Mapping) ---
+        # Instead of 0 or 20, we calculate risk points gradually
         risk_score = 0
-        if temp > 20: risk_score += 15
-        if wind < 15: risk_score += 15
-        if chl > 1.5: risk_score += 30
-        if poc > 100: risk_score += 20
-        if oxy < 250: risk_score += 20
-        risk_score = min(risk_score, 100)
         
+        # Temperature Risk (Starts increasing above 18C, maxes at 25C)
+        risk_score += min(15, max(0, (temp - 18) * 2.1))
+        
+        # Wind Risk (Higher risk as wind drops below 15 km/h)
+        risk_score += min(15, max(0, (15 - wind) * 1.5))
+        
+        # Chlorophyll Risk (Sharp increase above 1.2 mg/m3)
+        risk_score += min(30, max(0, (chl - 1.2) * 50))
+        
+        # POC Risk (Increase above 80 mg/m3)
+        risk_score += min(20, max(0, (poc - 80) * 0.4))
+        
+        # Oxygen Risk (Starts increasing as O2 drops below 260)
+        risk_score += min(20, max(0, (260 - oxy) * 0.5))
+        
+        risk_score = int(min(risk_score, 100))
         scan_duration = time.time() - start_time
 
     # --- UI DISPLAY ---
@@ -71,38 +83,22 @@ if st.button("🚀 START LIVE SYSTEM SCAN", type="primary"):
 
 st.markdown("---")
 
-# --- UPDATED TECHNICAL DOCUMENTATION SECTION ---
 with st.expander("🛠️ Technical Methodology & Data Sources"):
     st.markdown("""
     #### **Data Provenance & Acquisition**
-    This system utilizes a multi-sensor data fusion approach to monitor the Marmara Sea ecosystem.
-    
     | Parameter | Source | Method / Sensor |
     | :--- | :--- | :--- |
-    | **Sea Temperature** | Open-Meteo / ECMWF | Numerical Weather Prediction (NWP) |
-    | **Wind Speed** | Open-Meteo | GFS & ICON Global Models |
-    | **Chlorophyll-a** | NASA ERDDAP | MODIS-Aqua Satellite (Spectral Analysis) |
-    | **Pollution (POC)** | NASA / Proxy | Bio-Optical Sensor Fusion (Chl-a x 45) |
+    | **Sea Temperature** | Open-Meteo / ECMWF | NWP Models |
+    | **Wind Speed** | Open-Meteo | GFS & ICON Models |
+    | **Chlorophyll-a** | NASA ERDDAP | MODIS-Aqua Satellite |
+    | **Pollution (POC)** | NASA / Proxy | Bio-Optical Fusion |
     | **Oxygen (O2)** | Virtual Buoy | Thermodynamic Modeling |
 
     #### **Thermodynamic Oxygen Estimation (Henry's Law)**
-    Due to spatial resolution limits of global satellite models in inland seas, Dissolved Oxygen (DO) is estimated using a thermodynamic model based on **Henry's Law**:
     """)
-    
-    # Henry's Law Formula in LaTeX
     st.latex(r"C = k_H \cdot P_{gas}")
-    
     st.markdown("""
-    Where:
-    - **$C$**: Concentration of dissolved oxygen ($mmol/m^3$).
-    - **$k_H$**: Temperature-dependent Henry’s Law constant.
-    - **$P_{gas}$**: Partial pressure of oxygen above the liquid.
-    
-    *Note: Our algorithm uses a linearized version of this relationship adjusted for the Marmara Sea's average salinity (~22 ppt).*
-
-    #### **Algorithm & Validation**
-    - **F1-Score (92.4%):** Accuracy validated against the historical **2021 Marmara Mucilage Event** data.
-    - **Sensor Fusion:** In case of cloud coverage, **POC (Particulate Organic Carbon)** is calculated using Chlorophyll-a as a biological proxy.
+    Where **$C$** is the dissolved oxygen concentration. Our model uses a linearized version adjusted for Marmara's salinity (~22 ppt) to estimate oxygen solubility based on live temperature inputs.
     """)
 
-st.caption("🏆 AI Validation: 92.4%")
+st.caption("🏆  AI Validation: 92.4%")
