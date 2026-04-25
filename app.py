@@ -71,7 +71,7 @@ if st.button("🚀 START LIVE SYSTEM SCAN", type="primary"):
 
 st.markdown("---")
 
-# --- NEW TECHNICAL DOCUMENTATION SECTION ---
+# --- UPDATED TECHNICAL DOCUMENTATION SECTION ---
 with st.expander("🛠️ Technical Methodology & Data Sources"):
     st.markdown("""
     #### **Data Provenance & Acquisition**
@@ -83,12 +83,26 @@ with st.expander("🛠️ Technical Methodology & Data Sources"):
     | **Wind Speed** | Open-Meteo | GFS & ICON Global Models |
     | **Chlorophyll-a** | NASA ERDDAP | MODIS-Aqua Satellite (Spectral Analysis) |
     | **Pollution (POC)** | NASA / Proxy | Bio-Optical Sensor Fusion (Chl-a x 45) |
-    | **Oxygen (O2)** | Virtual Buoy | Thermodynamic Modeling (Henry's Law) |
+    | **Oxygen (O2)** | Virtual Buoy | Thermodynamic Modeling |
+
+    #### **Thermodynamic Oxygen Estimation (Henry's Law)**
+    Due to spatial resolution limits of global satellite models in inland seas, Dissolved Oxygen (DO) is estimated using a thermodynamic model based on **Henry's Law**:
+    """)
+    
+    # Henry's Law Formula in LaTeX
+    st.latex(r"C = k_H \cdot P_{gas}")
+    
+    st.markdown("""
+    Where:
+    - **$C$**: Concentration of dissolved oxygen ($mmol/m^3$).
+    - **$k_H$**: Temperature-dependent Henry’s Law constant.
+    - **$P_{gas}$**: Partial pressure of oxygen above the liquid.
+    
+    *Note: Our algorithm uses a linearized version of this relationship adjusted for the Marmara Sea's average salinity (~22 ppt).*
 
     #### **Algorithm & Validation**
-    - **F1-Score (92.4%):** This represents the model's accuracy validated against the historical **2021 Marmara Mucilage Event** data.
-    - **Sensor Fusion:** In case of satellite cloud coverage, the system automatically calculates **POC (Particulate Organic Carbon)** using Chlorophyll-a as a biological proxy.
-    - **Thermodynamic Modeling:** Dissolved Oxygen is dynamically calculated based on live temperature inputs, simulating the physical oxygen solubility of the Marmara Sea.
+    - **F1-Score (92.4%):** Accuracy validated against the historical **2021 Marmara Mucilage Event** data.
+    - **Sensor Fusion:** In case of cloud coverage, **POC (Particulate Organic Carbon)** is calculated using Chlorophyll-a as a biological proxy.
     """)
 
-st.caption(" AI Validation: 92.4%")
+st.caption("🏆 AI Validation: 92.4%")
