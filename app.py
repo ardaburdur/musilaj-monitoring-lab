@@ -91,4 +91,4 @@ with st.expander("🛠️ Technical Methodology & Data Sources"):
     - **Thermodynamic Modeling:** Dissolved Oxygen is dynamically calculated based on live temperature inputs, simulating the physical oxygen solubility of the Marmara Sea.
     """)
 
-st.caption("🏆 Developed as an EEE Graduation Project | AI Validation: 92.4%")
+st.caption(" AI Validation: 92.4%")
